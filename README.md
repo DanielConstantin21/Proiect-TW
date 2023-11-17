@@ -36,5 +36,5 @@ MySQL - DB
 
 #### Frontend
 
-ReactJS
+ReactJS,
 Axios
