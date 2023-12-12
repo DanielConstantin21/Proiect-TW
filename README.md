@@ -32,7 +32,7 @@ Lucrare (copil)
 NodeJS,
 ExpressJS - framework,
 Sequelize - ORM
-MySQL - DB
+SQLite - DB
 
 #### Frontend
 
