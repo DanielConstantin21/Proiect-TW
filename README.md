@@ -18,7 +18,7 @@ Este posibila filtrarea dupa artist sau departament, precum si cautarea unor ter
 
 Utilizatorul poate vedea detalii despre o lucrare si o poate adauga in lista sa de favorite.
 
-Lista de favorite poate fi parcursa si deasemenea se pot sterge lucrari din aceasta.
+Lista de favorite poate fi parcursa si deasemenea se pot sterge artisti sau lucrari din aceasta.
 
 ## Specificatii:
 
@@ -32,7 +32,7 @@ Lucrare (copil)
 NodeJS,
 ExpressJS - framework,
 Sequelize - ORM
-SQLite - DB
+SQLite- DB
 
 #### Frontend
 
