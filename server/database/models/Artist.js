@@ -6,8 +6,8 @@ const Artist = sequelize.define("artist", {
     type: Sequelize.INTEGER,
     primaryKey: true,
   },
-  name: Sequelize.STRING,
-  birthDate: Sequelize.STRING,
+  title: Sequelize.STRING,
+  birth_date: Sequelize.INTEGER,
 });
 
 module.exports = Artist;
