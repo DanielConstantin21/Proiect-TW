@@ -9,12 +9,13 @@ const workRoutes = require("./routes/workRoutes");
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.get("/", function (req, res) {
-  res.send("Hi");
-});
+
 Artist.hasMany(Work, { foreignKey: "artistId" });
 Work.belongsTo(Artist, { foreignKey: "artistId" });
 app.use("/artists", artistRoutes);
 app.use("/works", workRoutes);
+app.get("/", function (req, res) {
+  res.send("Hi");
+});
 app.listen(8080);
 console.log("Server started on port 8080!");

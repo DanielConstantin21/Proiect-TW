@@ -15,11 +15,11 @@ const ArtistList = () => {
     };
 
     fetchArtists();
-  }, []);
+  }, [artists, setArtists]);
 
   return (
     <div>
-      <h2>Artists</h2>
+      <h2>My Favorite Artists</h2>
       <ul>
         {artists.map((artist) => (
           <li key={artist.id}>{artist.title}</li>

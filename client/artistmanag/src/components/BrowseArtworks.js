@@ -5,7 +5,7 @@ const BrowseArtworks = () => {
   const [artworks, setArtworks] = useState([]);
   const [pagination, setPagination] = useState({
     total: 0,
-    limit: 10, // Set your desired limit
+    limit: 10,
     page: 1,
     totalPages: 0,
   });
@@ -17,17 +17,20 @@ const BrowseArtworks = () => {
           `https://api.artic.edu/api/v1/artworks?page=${pagination.page}&limit=${pagination.limit}&fields=id,title,image_id,artist_id`
         );
         const data = await response.json();
-        const artworksWithArtistInfo = await Promise.all(
-          data.data.map(async (artwork) => {
-            // Fetch artist details for each artwork
-            const artistResponse = await fetch(
-              `https://api.artic.edu/api/v1/artists/${artwork.artist_id}`
-            );
-            const artistData = await artistResponse.json();
-            const artistTitle = artistData.data.title; // Assuming the artist title is available in the API response
 
-            return { ...artwork, artistTitle };
-          })
+        const artworksWithArtistInfo = await Promise.all(
+          data.data
+            .filter((a) => a.artist_id != null)
+            .map(async (artwork) => {
+              // Fetch artist details for each artwork
+              const artistResponse = await fetch(
+                `https://api.artic.edu/api/v1/artists/${artwork.artist_id}`
+              );
+              const artistData = await artistResponse.json();
+              const artistTitle = artistData.data.title; // Assuming the artist title is available in the API response
+
+              return { ...artwork, artistTitle };
+            })
         );
         setArtworks(artworksWithArtistInfo);
         setPagination((prevPagination) => ({
@@ -41,7 +44,7 @@ const BrowseArtworks = () => {
     };
 
     fetchData();
-  }, [pagination.page, pagination.limit]);
+  }, [artworks, setArtworks, pagination.page, pagination.limit]);
 
   const handlePageChange = (newPage) => {
     setPagination((prevPagination) => ({ ...prevPagination, page: newPage }));
@@ -50,66 +53,67 @@ const BrowseArtworks = () => {
   const handleAddToWorks = async (artwork) => {
     try {
       console.log("Adding artwork to works:", artwork);
-
+      console.log(artwork.id);
       // Check if the artist is already in the artists table
       const artistResponse = await fetch(
         `http://localhost:8080/artists/${artwork.artist_id}`
       );
       const artistData = await artistResponse.json();
 
-      if (!artistData.error) {
-        // Artist exists, proceed to add artwork to works table
-        const response = await fetch("http:://localhost:8080/works", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: artwork.id,
-            title: artwork.title,
-            imageId: artwork.image_id,
-            artistId: artistData.data.id, // Send artist data along with the artwork
-          }),
-        });
-
-        const responseData = await response.json();
-        console.log("Artwork added to works:", responseData);
-      } else {
+      console.log(
+        JSON.stringify({
+          id: artwork.id,
+          title: artwork.title,
+          imageId: artwork.image_id,
+          artistId: artwork.artist_id, // Send artist data along with the artwork
+        })
+      );
+      console.log(artistData.message === "Artist not found");
+      if (artistData.message === "Artist not found") {
         // Artist does not exist, add artist to artists table first
+        const artistResponse = await fetch(
+          `https://api.artic.edu/api/v1/artists/${artwork.artist_id}`
+        );
+        const artistData = await artistResponse.json();
+
         const addArtistResponse = await fetch("http://localhost:8080/artists", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            id: artistData.data.artist_id,
+            id: artistData.data.id,
             title: artistData.data.title,
             birth_date: artistData.data.birth_date,
           }),
         });
-
-        const addedArtistData = await addArtistResponse.json();
-        console.log(addedArtistData);
-        // Proceed to add artwork to works table with the newly added artist
-        const response = await fetch("http://localhost:8080/works", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            artwork,
-            artist: addedArtistData.data, // Send added artist data along with the artwork
-          }),
-        });
-        console.log(
-          JSON.stringify({
-            artwork,
-            artist: addedArtistData.data, // Send added artist data along with the artwork
-          })
-        );
-        const responseData = await response.json();
-        console.log("Artwork added to works:", responseData);
+        // const responseArtist = addArtistResponse.json();
+        // console.log(responseArtist.data.id);
       }
+      console.log(
+        JSON.stringify({
+          id: artwork.id,
+          title: artwork.title,
+          imageId: artwork.image_id,
+          artistId: artwork.artist_id, // Send artist data along with the artwork
+        })
+      );
+      // Artist exists, proceed to add artwork to works table
+      const resp = await fetch("http://localhost:8080/works", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: artwork.id,
+          title: artwork.title,
+          imageId: artwork.image_id,
+          artistId: artwork.artist_id,
+        }),
+      });
+
+      const respData = await resp.json();
+      console.log("Artwork added to works:", respData);
     } catch (error) {
       console.error("Error adding artwork to works:", error);
     }
@@ -117,8 +121,8 @@ const BrowseArtworks = () => {
 
   return (
     <div>
-      <h2>Artworks</h2>
-      <ul>
+      <h2>Browse Collection</h2>
+      <ul className="card-container">
         {artworks.map((artwork) => (
           <li key={artwork.id}>
             <div className="artwork-card">

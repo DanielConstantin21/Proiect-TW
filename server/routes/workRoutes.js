@@ -4,17 +4,21 @@ const Work = require("../database/models/Work");
 const { Sequelize, Op } = require("sequelize");
 const Artist = require("../database/models/Artist");
 
-router.post("/", async (req, res) => {
+router.post("/", async function (req, res) {
   try {
     const idArtist = req.body.artistId;
     console.log(idArtist);
     const artist = await Artist.findOne({ where: { id: idArtist } });
+    if (!artist) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Artist does not exist", data: {} });
+    }
     console.log(artist);
     if (!req.body || Object.keys(req.body).length === 0) {
       throw new Error("body is missing");
     }
 
-    const { id, title, imageId } = req.body;
     if (
       !req.body.hasOwnProperty("id") ||
       !req.body.hasOwnProperty("title") ||
@@ -23,7 +27,7 @@ router.post("/", async (req, res) => {
     ) {
       throw new Error("malformed request");
     }
-
+    const { id, title, imageId } = req.body;
     if (isNaN(id) || id < 0) {
       throw new Error("id should be a positive number");
     }
@@ -156,5 +160,28 @@ router.get("/", async function (req, res) {
       data: {},
     });
   }
+});
+router.delete("/:id", async function (req, res) {
+  const id = req.params.id;
+  Work.findByPk(id)
+    .then((work) => {
+      if (work) {
+        work.destroy();
+        return res
+          .status(202)
+          .json({ success: true, message: "Artwork was deleted", data: {} });
+      } else {
+        console.log("Artwork not found.");
+        return res.status(404).json({ message: "Artwork not found" });
+      }
+    })
+    .then((deletedWork) => {
+      if (deletedWork) {
+        console.log("Work deleted successfully.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error deleting record:", error);
+    });
 });
 module.exports = router;

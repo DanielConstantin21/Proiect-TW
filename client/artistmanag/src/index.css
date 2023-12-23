@@ -11,33 +11,45 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: auto;
+  /* display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; */
+  object-fit: cover;
+}
 /* Style for Artwork Card */
 .artwork-card {
+  flex: 0 0 calc(20% - 16px); /* Set width for 4 cards in a row, considering margin */
+  margin: 8px; /* Adjust margin as needed */
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 16px;
-  margin: 16px;
-  width: 300px;
-  height: 400px; /* Set a fixed height */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* Ensure the overflow is hidden to contain the image */
+  overflow: hidden;
 }
 
 .artwork-card img {
-  width: 100%;
-  height: 100%; /* Use 100% height to fully cover the container */
-  object-fit: cover; /* Ensure the image covers the entire space */
-  border-radius: 8px;
+  max-width: 100px;
+  min-width: 100px;
+  max-height: 100px;
+  min-height: 100px;
+  width: auto;
+  height: auto;
 }
 
-.artwork-card p {
-  margin: 0;
+div p {
+  margin: 1;
+  font-size: 0.7em; /* Example font size for paragraph */
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  color: #1b1a28; /* Example color for paragraph */
 }
 
 .artwork-card button {
-  margin-top: auto; /* Push the button to the bottom */
+  margin-top: auto;
   background-color: #3498db;
   color: #fff;
   border: none;
@@ -52,8 +64,9 @@ code {
   border-radius: 8px;
   padding: 16px;
   margin: 16px;
-  width: 300px;
-  height: 400px; /* Set a fixed height */
+  width: 200px;
+  height: 200px; /* Set a fixed height */
+  object-fit: cover;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
@@ -61,10 +74,10 @@ code {
 }
 
 .work-card img {
-  width: 100%;
-  height: 100%; /* Use 100% height to fully cover the container */
-  object-fit: cover; /* Ensure the image covers the entire space */
-  border-radius: 8px;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
 }
 
 .work-card p {
