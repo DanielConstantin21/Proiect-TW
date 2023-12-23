@@ -1,0 +1,4 @@
+server/package-lock.json
+server/node_modules
+client/artistmanag/node_modules
+client/package-lock.json

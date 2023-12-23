@@ -126,6 +126,18 @@ router.get("/artist/:id", async function (req, res) {
 //get work by id
 router.put("/:id", async function (req, res) {
   try {
+    const work = Work.findByPk(req.params.id);
+    if (!work) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Artwork not found.", data: {} });
+    }
+    work.title = req.body.title;
+    work.imageId = req.body.imageId;
+    work.artistId = req.body.artistId;
+    return res
+      .status(201)
+      .json({ success: true, message: "Artwork updated!", data: work });
   } catch (err) {
     return res
       .status(500)
