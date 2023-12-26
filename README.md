@@ -53,7 +53,7 @@ Adresa la care se gaseste serviciul: http://localhost:8080/api/v1
 Exemplu:
 http://localhost:8080/api/v1/artists
 
-POST va adauga un artist nou, mai jos un exemplu, intro functie async:
+POST va adauga un artist nou, mai jos un exemplu, intr-o functie async:
 
 ```
     const newArtist = await fetch(
