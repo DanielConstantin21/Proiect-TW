@@ -14,11 +14,11 @@ extern și frontend SPA realizat cu un framework bazat pe componente.
 
 Aplicatia foloseste datele si imaginile obtinute cu ajutorul API-ul public al [Institutului de Arta din Chicago](https://api.artic.edu/docs/)
 
-Este posibila filtrarea dupa artist sau departament, precum si cautarea unor termeni.
+Este posibila filtrarea dupa artist sau lucrare, precum si cautarea unor termeni.
 
-Utilizatorul poate vedea detalii despre o lucrare si o poate adauga in lista sa de favorite.
+Utilizatorul poate vedea detalii despre o lucrare si o poate adauga in colectia sa.
 
-Lista de favorite poate fi parcursa si deasemenea se pot sterge artisti sau lucrari din aceasta.
+Colectia personala (My Collection) poate fi parcursa si se pot sterge artisti sau lucrari din aceasta.
 
 ## Specificatii:
 
@@ -210,7 +210,7 @@ Exemplu: http://localhost:8080/api/v1/works
 }
 ```
 
-GET /artist/:id - va returna lista lucrarilor artistului cu id-ul specificat, paginata.
+GET /artist/:id - va returna lista lucrarilor artistului cu id-ul specificat, cu paginatie.
 Exemplu: http://localhost:8080/api/v1/works/artist/35801 va returna lista lucrarilor artistului cu id-ul 35801, intr-un array "works", raspuns de forma:
 
 ```
@@ -239,8 +239,8 @@ Datele returnate sunt paginate.
 #### Paginare
 
 Listingurile si cautarile sunt paginate. Vor fi returnate 12 inregistrari per pagina, in mod inplicit. Paginarea poate fi controlata prin intermediul urmatorilor parametrii:
-_ page , pentru a specifica o pagina anume (porneste de la 1, valoare implicita 1);
-_ limit , pentru a specifica numarul de inregistrari per pagina (valoare implicita 12)
+*page , pentru a specifica o pagina anume (porneste de la 1, valoare implicita 1);
+*limit , pentru a specifica numarul de inregistrari per pagina (valoare implicita 12)
 
 Exemplu, pentru un request GET http://localhost:8080/api/v1/works/search?title=Mad&page=1&limit=2 , raspunsul va fi de forma:
 
