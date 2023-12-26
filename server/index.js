@@ -12,8 +12,8 @@ app.use(express.json());
 
 Artist.hasMany(Work, { foreignKey: "artistId" });
 Work.belongsTo(Artist, { foreignKey: "artistId" });
-app.use("/artists", artistRoutes);
-app.use("/works", workRoutes);
+app.use("/api/v1/artists", artistRoutes);
+app.use("/api/v1/works", workRoutes);
 app.get("/", function (req, res) {
   res.send("Hi");
 });

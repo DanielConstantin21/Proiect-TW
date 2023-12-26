@@ -14,7 +14,7 @@ router.post("/", async function (req, res) {
         .status(400)
         .json({ success: false, message: "Artist does not exist", data: {} });
     }
-    console.log(artist);
+
     if (!req.body || Object.keys(req.body).length === 0) {
       throw new Error("body is missing");
     }
@@ -65,30 +65,31 @@ router.post("/", async function (req, res) {
     res.status(statusCode).json({ message: errorMessage });
   }
 });
-
+// Search works by title
 router.get("/search", async (req, res) => {
   try {
-    const term = req.query.title;
-    console.log(term);
-    const works = await Work.findAll({
-      where: Sequelize.where(
-        Sequelize.fn("LOWER", Sequelize.col("title")),
-        "LIKE",
-        `%${term.toLowerCase()}%`
-      ),
+    const { page, limit, title } = req.query;
+    const { size, offset } = getPagination(page - 1, limit);
+    var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
+    Work.findAndCountAll({
+      where: condition,
+      size,
+      offset,
+    }).then((data) => {
+      const response = getPagingData(data, page, size);
+      if (response.works.length === 0) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Not found", data: {} });
+      }
+      return res.send(response);
     });
-    if (works.length == 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Not found", data: {} });
-    }
-    res.status(200).json(works);
   } catch (err) {
     console.warn(err);
     res.status(500).json({ message: `Error occured: ${err}.` });
   }
 });
-
+//works by id
 router.get("/:id", async function (req, res) {
   try {
     const id = req.params.id;
@@ -107,7 +108,7 @@ router.get("/:id", async function (req, res) {
   }
 });
 
-//get works by artist id
+//works by artist id
 router.get("/artist/:id", async function (req, res) {
   try {
     const id = req.params.id;
@@ -117,8 +118,15 @@ router.get("/artist/:id", async function (req, res) {
         .status(404)
         .json({ success: false, message: "Artist not found", data: {} });
     }
-    const works = await Work.findAll({ where: { artistId: artist.id } });
-    return res.status(200).json(works);
+    const { page, limit } = req.query;
+    const { size, offset } = getPagination(page - 1, limit);
+
+    Work.findAndCountAll({ where: { artistId: artist.id }, size, offset }).then(
+      (data) => {
+        const response = getPagingData(data, page, size);
+        return res.send(response);
+      }
+    );
   } catch (err) {
     console.log(err);
     return res
@@ -127,43 +135,63 @@ router.get("/artist/:id", async function (req, res) {
   }
 });
 
-//get work by id
+//create work by id
 router.put("/:id", async function (req, res) {
   try {
-    const work = Work.findByPk(req.params.id);
-    if (!work) {
+    const reqid = req.params.id;
+    const { id, title, imageId, artistId } = req.body;
+    console.log(id);
+    const work = await Work.findByPk(reqid);
+    console.log(work);
+    if (!work)
       return res
         .status(404)
         .json({ success: false, message: "Artwork not found.", data: {} });
+    console.log(artistId);
+    if (artistId) {
+      const artist = await Artist.findByPk(artistId);
+      if (!artist)
+        return res.status(400).json({
+          success: false,
+          message: "ArtistId not in database",
+          data: {},
+        });
     }
-    work.title = req.body.title;
-    work.imageId = req.body.imageId;
-    work.artistId = req.body.artistId;
+    const updated = await Work.update(req.body, { where: { id: reqid } });
     return res
-      .status(201)
-      .json({ success: true, message: "Artwork updated!", data: work });
+      .status(200)
+      .json({ success: true, message: "Artwork updated!", data: updated });
   } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, message: "Error retrieving artwork.", data: {} });
+    return res.status(500).json({
+      success: false,
+      message: "Error retrieving artwork.",
+      data: null,
+    });
   }
 });
+
+// all works
 router.get("/", async function (req, res) {
   try {
-    const works = await Work.findAll();
-    res.status(200).json(works);
+    const { page, limit } = req.query;
+    const { size, offset } = getPagination(page - 1, limit);
+
+    await Work.findAndCountAll({ size, offset }).then((data) => {
+      const response = getPagingData(data, page, size);
+      res.status(200).send(response);
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({
       success: false,
       message: "Error retrieving artworks.",
-      data: {},
+      data: null,
     });
   }
 });
 router.delete("/:id", async function (req, res) {
   const id = req.params.id;
-  Work.findByPk(id)
+  await Work.findByPk(id)
     .then((work) => {
       if (work) {
         work.destroy();
@@ -171,17 +199,28 @@ router.delete("/:id", async function (req, res) {
           .status(202)
           .json({ success: true, message: "Artwork was deleted", data: {} });
       } else {
-        console.log("Artwork not found.");
-        return res.status(404).json({ message: "Artwork not found" });
-      }
-    })
-    .then((deletedWork) => {
-      if (deletedWork) {
-        console.log("Work deleted successfully.");
+        return res
+          .status(404)
+          .json({ success: false, message: "Artwork not found", data: {} });
       }
     })
     .catch((error) => {
       console.error("Error deleting record:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Error deleting artwork!" });
     });
 });
+
+const getPagination = (page, lim) => {
+  const size = lim ? +lim : 12;
+  const offset = page ? page * size : 0;
+  return { size, offset };
+};
+const getPagingData = (data, page, limit) => {
+  const { count: totalItems, rows: works } = data;
+  const currentPage = page ? (page > 0 ? page : 1) : 1;
+  const totalPages = Math.ceil(totalItems / limit);
+  return { totalItems, works, totalPages, currentPage };
+};
 module.exports = router;

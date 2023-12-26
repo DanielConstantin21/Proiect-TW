@@ -4,6 +4,7 @@ const Artist = require("../database/models/Artist");
 const Work = require("../database/models/Work");
 const { Sequelize, Op } = require("sequelize");
 
+//add artist
 router.post("/", async (req, res) => {
   try {
     if (!req.body || Object.keys(req.body).length === 0) {
@@ -63,23 +64,51 @@ router.post("/", async (req, res) => {
   }
 });
 
+//search artist by title
 router.get("/search", async (req, res) => {
   try {
-    const term = req.query.title;
-    console.log(term);
-    const artists = await Artist.findAll({
-      where: Sequelize.where(
-        Sequelize.fn("LOWER", Sequelize.col("title")),
-        "LIKE",
-        `%${term.toLowerCase()}%`
-      ),
-    });
-    if (artists.length == 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Not found", data: {} });
+    const { page, limit, title, gt, lt } = req.query;
+    const { size, offset } = getPagination(page - 1, limit);
+    const condition1 = title ? { title: { [Op.like]: `%${title}%` } } : null;
+
+    const condition2 = gt
+      ? { birth_date: { [Op.gt]: parseInt(gt, 10) } }
+      : null;
+
+    const condition3 = lt
+      ? { birth_date: { [Op.lt]: parseInt(lt, 10) } }
+      : null;
+
+    // Build the final conditions object
+    const conditions = {
+      [Op.and]: [],
+    };
+    if (condition1) {
+      conditions[Op.and].push(condition1);
     }
-    res.status(200).json(artists);
+    if (condition2 && condition3) {
+      conditions[Op.and].push({
+        [Op.and]: [condition2, condition3],
+      });
+    } else if (condition2 || condition3) {
+      conditions[Op.and].push({
+        [Op.or]: [condition2, condition3].filter(Boolean),
+      });
+    }
+    console.log(conditions);
+    await Artist.findAndCountAll({
+      where: conditions,
+      size,
+      offset,
+    }).then((data) => {
+      const response = getPagingData(data, page, size);
+      if (response.artists.length === 0) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Not found", data: {} });
+      }
+      res.send(response);
+    });
   } catch (err) {
     console.warn(err);
     res.status(500).json({ message: `Error occured: ${err}.` });
@@ -95,9 +124,9 @@ router.get("/:id", async function (req, res) {
         .status(404)
         .json({ success: false, message: "Artist not found", data: {} });
     }
-    //const artistWorks = await artist.getWorks();
-    //return res.status(200).json({ artist, works: artistWorks });
-    return res.status(200).json(artist);
+    const works = await Work.findAll({ where: { artistId: id } });
+
+    return res.status(200).json({ artist, works });
   } catch (err) {
     console.log(err);
     return res
@@ -108,16 +137,36 @@ router.get("/:id", async function (req, res) {
 
 router.put("/:id", async function (req, res) {
   try {
+    const reqid = req.params.id;
+    const { id, title, birth_date } = req.body;
+    const artist = await Artist.findByPk(reqid);
+    if (!artist)
+      return res
+        .status(404)
+        .json({ success: false, message: "Artist not found.", data: {} });
+
+    const updated = await Artist.update(req.body, { where: { id: reqid } });
+    console.log(updated);
+    return res
+      .status(200)
+      .json({ success: true, message: "Artist updated!", data: {} });
   } catch (err) {
     return res
       .status(500)
-      .json({ success: false, message: "Error retrieving artist.", data: {} });
+      .json({ success: false, message: "Error updating artist.", data: {} });
   }
 });
+
 router.get("/", async function (req, res) {
   try {
-    const artists = await Artist.findAll();
-    res.status(200).json(artists);
+    const { page, limit } = req.query;
+    const { size, offset } = getPagination(page - 1, limit);
+
+    Artist.findAndCountAll({ size, offset }).then((data) => {
+      const response = getPagingData(data, page, size);
+      res.send(response);
+    });
+    // res.status(200).json(response);
   } catch (err) {
     console.log(err);
     return res
@@ -125,4 +174,39 @@ router.get("/", async function (req, res) {
       .json({ success: false, message: "Error retrieving artists.", data: {} });
   }
 });
+//delete artist
+router.delete("/:id", async function (req, res) {
+  const id = req.params.id;
+  await Artist.findByPk(id)
+    .then((work) => {
+      if (work) {
+        work.destroy();
+        return res
+          .status(202)
+          .json({ success: true, message: "Artwork was deleted", data: {} });
+      } else {
+        return res
+          .status(404)
+          .json({ success: false, message: "Artwork not found", data: {} });
+      }
+    })
+    .catch((error) => {
+      console.error("Error deleting record:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Error deleting artwork!" });
+    });
+});
+
+const getPagination = (page, lim) => {
+  const size = lim ? +lim : 12;
+  const offset = page ? page * size : 0;
+  return { size, offset };
+};
+const getPagingData = (data, page, limit) => {
+  const { count: totalItems, rows: artists } = data;
+  const currentPage = page ? (page > 0 ? page : 1) : 1;
+  const totalPages = Math.ceil(totalItems / limit);
+  return { totalItems, artists, totalPages, currentPage };
+};
 module.exports = router;
