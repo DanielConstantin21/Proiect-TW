@@ -144,7 +144,11 @@ router.put("/:id", async function (req, res) {
       return res
         .status(404)
         .json({ success: false, message: "Artist not found.", data: {} });
-
+    if (birth_date > new Date().getFullYear() - 5) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Birth date is invalid.", data: {} });
+    }
     const updated = await Artist.update(req.body, { where: { id: reqid } });
     console.log(updated);
     return res
