@@ -72,11 +72,11 @@ router.get("/search", async (req, res) => {
     const condition1 = title ? { title: { [Op.like]: `%${title}%` } } : null;
 
     const condition2 = gt
-      ? { birth_date: { [Op.gt]: parseInt(gt, 10) } }
+      ? { birth_date: { [Op.gte]: parseInt(gt, 10) } }
       : null;
 
     const condition3 = lt
-      ? { birth_date: { [Op.lt]: parseInt(lt, 10) } }
+      ? { birth_date: { [Op.lte]: parseInt(lt, 10) } }
       : null;
 
     // Build the final conditions object
@@ -187,18 +187,18 @@ router.delete("/:id", async function (req, res) {
         work.destroy();
         return res
           .status(202)
-          .json({ success: true, message: "Artwork was deleted", data: {} });
+          .json({ success: true, message: "Artist was deleted", data: {} });
       } else {
         return res
           .status(404)
-          .json({ success: false, message: "Artwork not found", data: {} });
+          .json({ success: false, message: "Artist not found", data: {} });
       }
     })
     .catch((error) => {
       console.error("Error deleting record:", error);
       return res
         .status(500)
-        .json({ success: false, message: "Error deleting artwork!" });
+        .json({ success: false, message: "Error deleting artist!" });
     });
 });
 

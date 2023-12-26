@@ -10,7 +10,11 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-Artist.hasMany(Work, { foreignKey: "artistId" });
+Artist.hasMany(Work, {
+  foreignKey: "artistId",
+  onDelete: "cascade",
+  hooks: true,
+});
 Work.belongsTo(Artist, { foreignKey: "artistId" });
 app.use("/api/v1/artists", artistRoutes);
 app.use("/api/v1/works", workRoutes);

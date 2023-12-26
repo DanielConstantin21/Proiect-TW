@@ -53,27 +53,6 @@ Adresa la care se gaseste serviciul: http://localhost:8080/api/v1
 Exemplu:
 http://localhost:8080/api/v1/artists
 
-GET va returna lista tuturor artistilor:
-
-```
-{
-    "totalItems": 20,
-    "artists": [
-        {
-            "id": 24597,
-            "title": "Elizabeth Sparhawk-Jones",
-            "birth_date": 1885,
-            "createdAt": "2023-12-23T22:16:15.455Z",
-            "updatedAt": "2023-12-23T22:16:15.455Z"
-        },
-        ...
-
-     ],
-    "totalPages": 2,
-    "currentPage": 1
-}
-```
-
 POST va adauga un artist nou, mai jos un exemplu, intro functie async:
 
 ```
@@ -113,6 +92,9 @@ Exemplu body pt un apel de tip PUT http://localhost:8080/api/v1/artists/33571
 
 Ca si in cazul crearii unui artist nou, se considera ca un artist trebuie sa aiba mai mult de 5 ani.
 
+DELETE /:id - sterge din baza de date artistul cu id-ul specificat.
+De exemplu, un request de tip DELETE la http://localhost:8080/api/v1/artists/40 va sterge din baza de date artistul cu id-ul 40, daca acesta exista, si toate lucrarile asociate acestuia.
+
 GET /:id - va returna artistul cu id-ul specificat si lucrarile asociate ("works"), un exemplu http://localhost:8080/api/v1/artists/33571 ar putea returna:
 
 ```
@@ -136,3 +118,160 @@ GET /:id - va returna artistul cu id-ul specificat si lucrarile asociate ("works
     ]
 }
 ```
+
+GET va returna lista tuturor artistilor din baza de date:
+
+```
+{
+    "totalItems": 20,
+    "artists": [
+        {
+            "id": 24597,
+            "title": "Elizabeth Sparhawk-Jones",
+            "birth_date": 1885,
+            "createdAt": "2023-12-23T22:16:15.455Z",
+            "updatedAt": "2023-12-23T22:16:15.455Z"
+        },
+        ...
+
+     ],
+    "totalPages": 2,
+    "currentPage": 1
+}
+```
+
+GET /search - se pot face cautari dupa o parte a numelui artistului si diverse intervale ale anului nasterii.
+Requestul este de forma http://localhost:8080/api/v1/artists/search? urmat de parametrii cautarii title, gt, lt, despartiti prin '&'. Exemplu: http://localhost:8080/api/v1/artists/search?title=cl&gt=1600&lt=1800 va returna toti artistii care contin 'cl' in nume si sunt nascuti intre 1600 si 1800 (inclusiv). Oricare dintre parametrii cautarii poate lipsi, in cazul in care nu se mentioneaza nici un parametru, toate inregistrarile din baza de date vor fi returnate.
+Datele returnate sunt paginate.
+
+#### /works - pune la dispozitie date despre lucrarile asociate artistilor
+
+Exemplu:
+http://localhost:8080/api/v1/works
+
+POST va adauga o lucrare noua, mai jos un exemplu, intro functie async:
+
+```
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: {
+                "id": 3752,
+                "title": "The Madonna of the Rosary",
+                "imageId": "d0979087-dc1b-f259-a23f-169cdced27ee",
+                "artistId": 37116
+            }
+          }
+```
+
+daca artistul cu id-ul specificat nu exista, va fi returnat un mesaj de eroare.
+daca lucrarea cu id-ul specificat exista deja in baza de date, va fi returnat un mesaj de eroare, precum si daca unul dintre campuri lipseste sau este null.
+
+PUT /:id - modifica lucrarea cu id-ul specificat, daca acesta exista in baza de date, daca id-ul nu exista va returna un mesaj de eroare.
+Campurile ce se doresc a fi modificate se vor specifica in body.
+
+DELETE /:id - sterge din baza de date lucrarea cu id-ul specificat.
+De exemplu, un request de tip DELETE la http://localhost:8080/api/v1/works/27281 va sterge din baza de date lucrarea cu id-ul 27281, daca acesta exista.
+
+GET /:id - va returna lucrarea cu id-ul specificat, un exemplu http://localhost:8080/api/v1/works/33571 ar returna, in cazul in care acest id se afla in baza de date, ceva de tipul:
+
+```
+{
+    "id": 20199,
+    "title": "Final Study for \"Bathers at Asnières\"",
+    "imageId": "1db67905-d421-95bf-1e91-4b60dd776886",
+    "createdAt": "2023-12-23T20:32:36.408Z",
+    "updatedAt": "2023-12-23T20:32:36.408Z",
+    "artistId": 40810
+}
+```
+
+GET va returna lista tuturor lucrarilor din baza de date, cu paginatie.
+Exemplu: http://localhost:8080/api/v1/works
+
+```
+{
+    "totalItems": 10,
+    "works": [
+        {
+            "id": 3752,
+            "title": "The Madonna of the Rosary",
+            "imageId": "d0979087-dc1b-f259-a23f-169cdced27ee",
+            "createdAt": "2023-12-23T20:30:06.427Z",
+            "updatedAt": "2023-12-23T20:30:06.427Z",
+            "artistId": 37116
+        },
+        ....
+    ],
+    "totalPages": 1,
+    "currentPage": 1
+}
+```
+
+GET /artist/:id - va returna lista lucrarilor artistului cu id-ul specificat, paginata.
+Exemplu: http://localhost:8080/api/v1/works/artist/35801 va returna lista lucrarilor artistului cu id-ul 35801, intr-un array "works", raspuns de forma:
+
+```
+{
+    "totalItems": 1,
+    "works": [
+        {
+            "id": 27281,
+            "title": "Madam Pompadour",
+            "imageId": "fdc1a755-ff86-487d-f16b-f03c40a30bee",
+            "createdAt": "2023-12-23T21:50:44.121Z",
+            "updatedAt": "2023-12-23T21:50:44.121Z",
+            "artistId": 35801
+        }
+    ],
+    "totalPages": 1,
+    "currentPage": 1
+}
+```
+
+GET /search - se pot face cautari dupa o parte a numelui lucrarii.
+Requestul este de forma http://localhost:8080/api/v1/works/search? urmat de parametrul cautarii, title.
+Exemplu: http://localhost:8080/api/v1/works/search?title=Mad va returna lucrarile care contin 'mad' (case insensitive) in titlu. In cazul in care nu se mentioneaza nici un parametru, toate inregistrarile din baza de date vor fi returnate.
+Datele returnate sunt paginate.
+
+#### Paginare
+
+Listingurile si cautarile sunt paginate. Vor fi returnate 12 inregistrari per pagina, in mod inplicit. Paginarea poate fi controlata prin intermediul urmatorilor parametrii:
+_ page , pentru a specifica o pagina anume (porneste de la 1, valoare implicita 1);
+_ limit , pentru a specifica numarul de inregistrari per pagina (valoare implicita 12)
+
+Exemplu, pentru un request GET http://localhost:8080/api/v1/works/search?title=Mad&page=1&limit=2 , raspunsul va fi de forma:
+
+```
+{
+    "totalItems": 3,
+    "works": [
+        {
+            "id": 3752,
+            "title": "The Madonna of the Rosary",
+            "imageId": "d0979087-dc1b-f259-a23f-169cdced27ee",
+            "createdAt": "2023-12-23T20:30:06.427Z",
+            "updatedAt": "2023-12-23T20:30:06.427Z",
+            "artistId": 37116
+        },
+        {
+            "id": 27281,
+            "title": "Madam Pompadour",
+            "imageId": "fdc1a755-ff86-487d-f16b-f03c40a30bee",
+            "createdAt": "2023-12-23T21:50:44.121Z",
+            "updatedAt": "2023-12-23T21:50:44.121Z",
+            "artistId": 35801
+        },
+        ...
+    ],
+    "totalPages": 2,
+    "currentPage": "1"
+}
+```
+
+#### Mentiuni
+
+Avand in vedere faptul ca api-ul se bazeaza pe datele Art Institute of Chicago API, id-urile nu sunt implementate cu incrementare.
+Campul "imageId" reprezinta identificatorul pe baza caruia se vor accesa imaginile conform [IIIF Image API](https://api.artic.edu/docs/#images)
