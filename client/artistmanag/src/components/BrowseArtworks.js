@@ -56,7 +56,7 @@ const BrowseArtworks = () => {
       console.log(artwork.id);
       // Check if the artist is already in the artists table
       const artistResponse = await fetch(
-        `http://localhost:8080/artists/${artwork.artist_id}`
+        `http://localhost:8080/api/v1/artists/${artwork.artist_id}`
       );
       const artistData = await artistResponse.json();
 
@@ -76,30 +76,24 @@ const BrowseArtworks = () => {
         );
         const artistData = await artistResponse.json();
 
-        const addArtistResponse = await fetch("http://localhost:8080/artists", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: artistData.data.id,
-            title: artistData.data.title,
-            birth_date: artistData.data.birth_date,
-          }),
-        });
-        // const responseArtist = addArtistResponse.json();
-        // console.log(responseArtist.data.id);
+        const addArtistResponse = await fetch(
+          "http://localhost:8080/api/v1/artists",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: artistData.data.id,
+              title: artistData.data.title,
+              birth_date: artistData.data.birth_date,
+            }),
+          }
+        );
       }
-      console.log(
-        JSON.stringify({
-          id: artwork.id,
-          title: artwork.title,
-          imageId: artwork.image_id,
-          artistId: artwork.artist_id, // Send artist data along with the artwork
-        })
-      );
+
       // Artist exists, proceed to add artwork to works table
-      const resp = await fetch("http://localhost:8080/works", {
+      const resp = await fetch("http://localhost:8080/api/v1/works", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -130,13 +124,13 @@ const BrowseArtworks = () => {
                 src={`https://www.artic.edu/iiif/2/${artwork.image_id}/full/200,/0/default.jpg`}
                 alt={artwork.title}
               />
-            </div>
-            <div>
-              <p>{artwork.title}</p>
-              <p>Artist: {artwork.artistTitle}</p>
-              <button onClick={() => handleAddToWorks(artwork)}>
-                Add to Works
-              </button>
+              <div>
+                <p>{artwork.title}</p>
+                <p>Artist: {artwork.artistTitle}</p>
+                <button onClick={() => handleAddToWorks(artwork)}>
+                  Add to My Collection
+                </button>
+              </div>
             </div>
           </li>
         ))}
@@ -148,6 +142,7 @@ const BrowseArtworks = () => {
         >
           Previous Page
         </button>
+
         <span>
           {" "}
           Page {pagination.page} of {pagination.totalPages}{" "}

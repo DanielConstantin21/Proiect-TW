@@ -8,8 +8,8 @@ const WorkList = () => {
   useEffect(() => {
     const fetchWorks = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/works");
-        setWorks(response.data);
+        const response = await axios.get("http://localhost:8080/api/v1/works");
+        setWorks(response.data.works);
       } catch (error) {
         console.error("Error fetching works:", error);
       }

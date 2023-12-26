@@ -7,8 +7,10 @@ const ArtistList = () => {
   useEffect(() => {
     const fetchArtists = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/artists");
-        setArtists(response.data);
+        const response = await axios.get(
+          "http://localhost:8080/api/v1/artists"
+        );
+        setArtists(response.data.artists);
       } catch (error) {
         console.error("Error fetching artists:", error);
       }

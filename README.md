@@ -25,7 +25,7 @@ Lista de favorite poate fi parcursa si deasemenea se pot sterge artisti sau lucr
 #### Entitati
 
 Artist (parinte)
-Lucrare (copil)
+Work (copil)
 
 #### Backend
 
@@ -38,3 +38,35 @@ SQLite- DB
 
 ReactJS,
 Axios
+
+## Serviciu RESTful
+
+#### Introducere
+
+Serviciul nu necesita autentificare si pune la dispozitie date in format JSON.
+Adresa la care se gaseste serviciul: http://localhost:8080/api/v1
+
+#### Endpoint-uri
+
+/artists - pune la dispozitie date despre artisti
+Exemplu:
+http://localhost:8080/api/v1/artists
+
+```
+va returna lista tuturor artistilor:
+{
+"totalItems": 20,
+"artists": [
+{
+"id": 24597,
+"title": "Elizabeth Sparhawk-Jones",
+"birth_date": 1885,
+"createdAt": "2023-12-23T22:16:15.455Z",
+"updatedAt": "2023-12-23T22:16:15.455Z"
+},
+{
+"id": 31232,
+"title": "Claude Mozambic",
+"birth_date": 1690,
+...
+```
