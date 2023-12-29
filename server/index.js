@@ -5,6 +5,7 @@ const Work = require("./database/models/Work");
 const cors = require("cors");
 const artistRoutes = require("./routes/artistRoutes");
 const workRoutes = require("./routes/workRoutes");
+const externalRoutes = require("./routes/externalRoutes");
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
@@ -18,6 +19,7 @@ Artist.hasMany(Work, {
 Work.belongsTo(Artist, { foreignKey: "artistId" });
 app.use("/api/v1/artists", artistRoutes);
 app.use("/api/v1/works", workRoutes);
+app.use("/api/v1/external-api", externalRoutes);
 app.get("/", function (req, res) {
   res.send("Hi");
 });
