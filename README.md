@@ -271,8 +271,8 @@ Exemplu: http://localhost:8080/api/v1/external-api va returna informatiile din p
 Sunt returnate si informatii despre paginare, de asemenea "exists" returneaza true/false, dupa verificarea id-ului in baza de date.
 pot fi folositi in query si parametrii de paginare (page, limit)
 
-/artists/:id
-GET - returneaza informatiile din api-ul extern, referitoare la artistul cu id-ul mentionat
+GET /artists/:id - returneaza informatiile din api-ul extern, referitoare la artistul cu id-ul mentionat.
+Exemplu: http://localhost:8080/api/v1/external-api/artists/40769
 
 #### Paginare
 
