@@ -1,5 +1,6 @@
 server/package-lock.json
 client/package-lock.json
+cient/artistmanag/package-lock.json
 server/node_modules
 client/node_modules
 client/artistmanag/node_modules

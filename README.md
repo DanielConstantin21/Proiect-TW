@@ -236,6 +236,44 @@ Requestul este de forma http://localhost:8080/api/v1/works/search? urmat de para
 Exemplu: http://localhost:8080/api/v1/works/search?title=Mad va returna lucrarile care contin 'mad' (case insensitive) in titlu. In cazul in care nu se mentioneaza nici un parametru, toate inregistrarile din baza de date vor fi returnate.
 Datele returnate sunt paginate.
 
+#### /external-api - pune la dispozitie datele din api-ul extern
+
+GET /external-api returneaza lucrarile din api-ul extern, care au artist_id si picture_id diferit de null, si numele artistului.
+Exemplu: http://localhost:8080/api/v1/external-api va returna informatiile din prima pagina a api-ului Cicago Art Institute, in forma:
+
+```
+{
+    "data": [
+        {
+            "id": 3752,
+            "title": "The Madonna of the Rosary",
+            "birth_date": 1440,
+            "idArtist": 37116,
+            "titleArtist": "Israhel van Meckenem, the younger",
+            "exists": true
+        },
+        {
+            "id": 6010,
+            "title": "Number 19",
+            ....
+
+    ],
+    "pagination": {
+        "total": 123673,
+        "limit": 10,
+        "offset": 0,
+        "total_pages": 12368,
+        "current_page": 1,
+        "next_url": "https://api.artic.edu/api/v1/artworks?page=2&limit=10&fields=id%2Ctitle%2Cimage_id%2Cartist_id"
+    }
+```
+
+Sunt returnate si informatii despre paginare, de asemenea "exists" returneaza true/false, dupa verificarea id-ului in baza de date.
+pot fi folositi in query si parametrii de paginare (page, limit)
+
+/artists/:id
+GET - returneaza informatiile din api-ul extern, referitoare la artistul cu id-ul mentionat
+
 #### Paginare
 
 Listingurile si cautarile sunt paginate. Vor fi returnate 12 inregistrari per pagina, in mod inplicit. Paginarea poate fi controlata prin intermediul urmatorilor parametrii:
