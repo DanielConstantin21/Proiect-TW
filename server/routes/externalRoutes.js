@@ -35,13 +35,12 @@ router.get("/", async (req, res) => {
     try {
       const artistIds = limitedArtworks.map((artwork) => artwork.artist_id);
       const artistIdsString = artistIds.join(",");
-      const trimmedArtistIdsString = artistIdsString.slice(0, -1);
-      console.log(artistIdsString);
+
       const artistsResponse = await axios.get(
         `https://api.artic.edu/api/v1/artists`,
         {
           params: {
-            ids: trimmedArtistIdsString,
+            ids: artistIdsString,
             fields: "id,title,birth_date",
           },
         }
@@ -54,7 +53,7 @@ router.get("/", async (req, res) => {
         );
 
         // Verificam existenta lucrărilor in baza de date
-        const existWorkPromises = limitedArtworks.map((artwork) =>
+        const existWorkPromises = await limitedArtworks.map((artwork) =>
           Work.findOne({ where: { id: artwork.id } })
         );
         const existWork = await Promise.all(existWorkPromises);
@@ -64,21 +63,16 @@ router.get("/", async (req, res) => {
           data: limitedArtworks.map((artwork) => ({
             id: artwork.id,
             title: artwork.title,
-            birth_date: artistDataMap.has(artwork.artist_id)
-              ? artistDataMap.get(artwork.artist_id).birth_date
-              : null,
-            idArtist: artistDataMap.has(artwork.artist_id)
-              ? artistDataMap.get(artwork.artist_id).id
-              : null,
-            titleArtist: artistDataMap.has(artwork.artist_id)
-              ? artistDataMap.get(artwork.artist_id).title
-              : null,
+            image_id: artwork.image_id,
+            birth_date: artistDataMap.get(artwork.artist_id)?.birth_date,
+            idArtist: artwork.artist_id,
+            titleArtist: artistDataMap.get(artwork.artist_id)?.title,
             exists: existWork.some((work) => work && work.id === artwork.id),
           })),
           pagination: artworksResponse.data.pagination,
         };
 
-        res.json(response);
+        res.status(200).json(response);
       } else {
         console.log("Raspuns invalid de la API-ul artistilor");
         res

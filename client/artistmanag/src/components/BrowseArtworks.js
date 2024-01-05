@@ -14,25 +14,14 @@ const BrowseArtworks = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://api.artic.edu/api/v1/artworks?page=${pagination.page}&limit=${pagination.limit}&fields=id,title,image_id,artist_id`
+          `http://localhost:8080/api/v1/external-api?page=${pagination.page}&limit=${pagination.limit}`
         );
         const data = await response.json();
 
-        const artworksWithArtistInfo = await Promise.all(
-          data.data
-            .filter((a) => a.artist_id != null)
-            .map(async (artwork) => {
-              // Fetch artist details for each artwork
-              const artistResponse = await fetch(
-                `https://api.artic.edu/api/v1/artists/${artwork.artist_id}`
-              );
-              const artistData = await artistResponse.json();
-              const artistTitle = artistData.data.title; // Assuming the artist title is available in the API response
+        // const myData = JSON.parse(data.data);
+        // console.log(myData);
 
-              return { ...artwork, artistTitle };
-            })
-        );
-        setArtworks(artworksWithArtistInfo);
+        setArtworks(data.data);
         setPagination((prevPagination) => ({
           ...prevPagination,
           total: data.pagination.total,
@@ -44,7 +33,7 @@ const BrowseArtworks = () => {
     };
 
     fetchData();
-  }, [artworks, setArtworks, pagination.page, pagination.limit]);
+  }, [pagination.page, pagination.limit]);
 
   const handlePageChange = (newPage) => {
     setPagination((prevPagination) => ({ ...prevPagination, page: newPage }));
@@ -53,28 +42,28 @@ const BrowseArtworks = () => {
   const handleAddToWorks = async (artwork) => {
     try {
       console.log("Adding artwork to works:", artwork);
-      console.log(artwork.id);
+      //  console.log(artwork.id);
       // Check if the artist is already in the artists table
       const artistResponse = await fetch(
-        `http://localhost:8080/api/v1/artists/${artwork.artist_id}`
+        `http://localhost:8080/api/v1/artists/${artwork.idArtist}`
       );
       const artistData = await artistResponse.json();
 
-      console.log(
-        JSON.stringify({
-          id: artwork.id,
-          title: artwork.title,
-          imageId: artwork.image_id,
-          artistId: artwork.artist_id, // Send artist data along with the artwork
-        })
-      );
-      console.log(artistData.message === "Artist not found");
+      // console.log(
+      //   JSON.stringify({
+      //     id: artwork.id,
+      //     title: artwork.title,
+      //     imageId: artwork.image_id,
+      //     artistId: artwork.artist_id, // Send artist data along with the artwork
+      //   })
+      // );
+
       if (artistData.message === "Artist not found") {
         // Artist does not exist, add artist to artists table first
-        const artistResponse = await fetch(
-          `https://api.artic.edu/api/v1/artists/${artwork.artist_id}`
-        );
-        const artistData = await artistResponse.json();
+        // const artistResponse = await fetch(
+        //   `https://api.artic.edu/api/v1/artists/${artwork.artist_id}`
+        // );
+        // // const artistData = await artistResponse.json();
 
         const addArtistResponse = await fetch(
           "http://localhost:8080/api/v1/artists",
@@ -84,15 +73,16 @@ const BrowseArtworks = () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              id: artistData.data.id,
-              title: artistData.data.title,
-              birth_date: artistData.data.birth_date,
+              id: artwork.idArtist,
+              title: artwork.titleArtist,
+              birth_date: artwork.birth_date,
             }),
           }
         );
       }
 
       // Artist exists, proceed to add artwork to works table
+
       const resp = await fetch("http://localhost:8080/api/v1/works", {
         method: "POST",
         headers: {
@@ -102,7 +92,7 @@ const BrowseArtworks = () => {
           id: artwork.id,
           title: artwork.title,
           imageId: artwork.image_id,
-          artistId: artwork.artist_id,
+          artistId: artwork.idArtist,
         }),
       });
 
@@ -126,15 +116,14 @@ const BrowseArtworks = () => {
               />
               <div>
                 <p>{artwork.title}</p>
-                <p>Artist: {artwork.artistTitle}</p>
-                <button onClick={() => handleAddToWorks(artwork)}>
-                  Add to My Collection
-                </button>
+                <p>Artist: {artwork.titleArtist}</p>
+                <button onClick={() => handleAddToWorks(artwork)}>Add</button>
               </div>
             </div>
           </li>
         ))}
       </ul>
+
       <div>
         <button
           disabled={pagination.page === 1}
