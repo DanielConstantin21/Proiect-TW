@@ -49,15 +49,6 @@ const BrowseArtworks = () => {
       );
       const artistData = await artistResponse.json();
 
-      // console.log(
-      //   JSON.stringify({
-      //     id: artwork.id,
-      //     title: artwork.title,
-      //     imageId: artwork.image_id,
-      //     artistId: artwork.artist_id, // Send artist data along with the artwork
-      //   })
-      // );
-
       if (artistData.message === "Artist not found") {
         // Artist does not exist, add artist to artists table first
         // const artistResponse = await fetch(
