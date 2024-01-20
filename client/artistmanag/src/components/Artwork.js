@@ -20,7 +20,7 @@ const Artwork = () => {
     };
 
     fetchWork();
-  }, []);
+  }, [id]);
 
   console.log(work);
 

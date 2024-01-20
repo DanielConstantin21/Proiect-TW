@@ -18,9 +18,6 @@ const BrowseArtworks = () => {
         );
         const data = await response.json();
 
-        // const myData = JSON.parse(data.data);
-        // console.log(myData);
-
         setArtworks(data.data);
         setPagination((prevPagination) => ({
           ...prevPagination,
@@ -50,12 +47,6 @@ const BrowseArtworks = () => {
       const artistData = await artistResponse.json();
 
       if (artistData.message === "Artist not found") {
-        // Artist does not exist, add artist to artists table first
-        // const artistResponse = await fetch(
-        //   `https://api.artic.edu/api/v1/artists/${artwork.artist_id}`
-        // );
-        // // const artistData = await artistResponse.json();
-
         const addArtistResponse = await fetch(
           "http://localhost:8080/api/v1/artists",
           {
@@ -89,6 +80,7 @@ const BrowseArtworks = () => {
 
       const respData = await resp.json();
       console.log("Artwork added to works:", respData);
+      alert("Artwork was added to your collection");
     } catch (error) {
       console.error("Error adding artwork to works:", error);
     }
