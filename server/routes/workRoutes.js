@@ -38,7 +38,7 @@ router.post("/", async function (req, res) {
       imageId,
       artistId: artist.id,
     });
-    // Returnăm un răspuns corespunzător
+    // Returnam un raspuns corespunzator
     return res
       .status(201)
       .json({ success: true, message: "artwork created", data: work }); // TODO
@@ -176,7 +176,7 @@ router.get("/", async function (req, res) {
     const { page, limit } = req.query;
     const { size, offset } = getPagination(page - 1, limit);
 
-    await Work.findAndCountAll({ size, offset }).then((data) => {
+    await Work.findAndCountAll({ limit: size, offset }).then((data) => {
       const response = getPagingData(data, page, size);
       res.status(200).send(response);
     });
@@ -189,6 +189,7 @@ router.get("/", async function (req, res) {
     });
   }
 });
+//stergere work dupa id
 router.delete("/:id", async function (req, res) {
   const id = req.params.id;
   await Work.findByPk(id)
@@ -213,7 +214,7 @@ router.delete("/:id", async function (req, res) {
 });
 
 const getPagination = (page, lim) => {
-  const size = lim ? +lim : 12;
+  const size = lim ? +lim : 10;
   const offset = page ? page * size : 0;
   return { size, offset };
 };
